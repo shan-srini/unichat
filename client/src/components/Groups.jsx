@@ -8,13 +8,13 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 const Container = styled.div`
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   margin: 10px 0px;
   height: 100vh;
   min-width: 0;
   min-height: 0;
+  width: 40%;
 `;
 const GroupHeader = styled.h1`
   margin: 10px;
@@ -46,7 +46,7 @@ const StyledTextField = styled(TextField)`
 /**
  * All groups a user is in, and controls to join/create groups
  */
-export default function Groups({ groups, onAddGroup, onSelectGroup }) {
+export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGroup }) {
   const [errMsg, setErrMsg] = useState(null);
   const [inputGroup, setInputGroup] = useState('');
 
@@ -75,7 +75,7 @@ export default function Groups({ groups, onAddGroup, onSelectGroup }) {
       <Divider variant="middle" />
       <StyledList component="nav" aria-label="secondary mailbox folders" style={{ padding: '0px 16px' }}>
         {groups.map((g, idx) => (
-          <ListItem button divider key={g} onClick={() => onSelectGroup(idx)}>
+          <ListItem button divider key={g} selected={selectedGrpIdx === idx} onClick={() => onSelectGroup(idx)}>
             <GroupName primary={g} />
           </ListItem>
         ))}

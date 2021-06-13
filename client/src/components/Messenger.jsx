@@ -14,7 +14,7 @@ const Container = styled.div`
 
 export default function Messenger() {
   const [socket, setSocket] = useState(null);
-  const [groups, setGroups] = useState(['group1', 'group two']);
+  const [groups, setGroups] = useState([]);
   //TODO:  should really start as empty, should have both name and id
   const [currGroup, setCurrGroup] = useState(0);
 
@@ -32,6 +32,7 @@ export default function Messenger() {
     <Container>
       <Groups
         groups={groups}
+        selectedGrpIdx={currGroup}
         onAddGroup={onAddGroup}
         onSelectGroup={setCurrGroup}
       />
