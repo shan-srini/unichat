@@ -3,14 +3,14 @@ from services import chat as chat_service
 
 conversations = Blueprint('conversations', __name__)
 
-@conversations.route('/createGroup', methods=['POST'])
+@conversations.route('/conversation', methods=['POST'])
 def create_group():
     """
     Attempts to create a conversation
     body:
         - groupId: str representing groupId to create
     """
-    body = request.get_json()
+    body = request.get_json(force=True)
     group_id = body.get('groupId')
     # check in redis if group_id already exists
     success = chat_service.create_conversation(group_id)
@@ -31,6 +31,7 @@ def get_conversation(conv_id: str):
     start = page * 10
     end = (page + 1) * 10
 
+    # TODO: do something abt g.redis
     message_ids = g.redis.lrange(conv_id, start, end)
     messages = g.redis.hgetall(message_ids)
     

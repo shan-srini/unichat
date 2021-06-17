@@ -45,7 +45,7 @@ const StyledSelect = styled.select`
 /**
  * All groups a user is in, and controls to join/create groups
  */
-export default function User({username, userLang, onSetUser, onSetUserLang }) {
+export default function User({ username, userLang, onSetUser, onSetUserLang }) {
   const [errMsg, setErrMsg] = useState(null);
   const [inputName, setInputName] = useState('');
   const [inputLang, setInputLang] = useState('');
@@ -66,13 +66,11 @@ export default function User({username, userLang, onSetUser, onSetUserLang }) {
   };
 
   const setUser = () => {
-    setUsername()
-      setUserLang()
-
+    setUsername();
+    setUserLang();
   };
 
   return (
-
     <Container>
       <GroupHeader>Create User</GroupHeader>
 
@@ -89,34 +87,25 @@ export default function User({username, userLang, onSetUser, onSetUserLang }) {
         helperText={errMsg || 'Enter unique username'}
       />
 
-
-        <StyledSelect
-                className="form-control margin-bottom-10px"
-                onChange={(e) => setInputLang(e.target.value)}
-                value={inputLang}
-
-        >
-                <option> Enter your Preferred Language: </option>
-            <option value= {"en"}>Current Browser Language: {navigator.language}</option>
-            <option value= {"en"}>English</option>
-            <option value = {"zh"}> Chinese </option>
-            <option value = {"hi"}> Hindi</option>
-            <option value = {"es"}> Spanish </option>
-            <option value = {"fr"}> French</option>
-
-        </StyledSelect>
+      <StyledSelect
+        className="form-control margin-bottom-10px"
+        onChange={(e) => setInputLang(e.target.value)}
+        value={inputLang}
+      >
+        <option> Enter your Preferred Language: </option>
+        <option value={'en'}>Current Browser Language: {navigator.language}</option>
+        <option value={'en'}>English</option>
+        <option value={'zh'}> Chinese </option>
+        <option value={'hi'}> Hindi</option>
+        <option value={'es'}> Spanish </option>
+        <option value={'fr'}> French</option>
+      </StyledSelect>
 
       <ButtonRow>
         <StyledButton variant="contained" color="secondary" onClick={setUser}>
           Create
         </StyledButton>
       </ButtonRow>
-
     </Container>
-
-
-
-
-
   );
 }

@@ -6,6 +6,7 @@ import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+const axios = require('axios');
 
 const Container = styled.div`
   display: flex;
@@ -46,7 +47,7 @@ const StyledTextField = styled(TextField)`
 /**
  * All groups a user is in, and controls to join/create groups
  */
-export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGroup }) {
+export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGroup, socket }) {
   const [errMsg, setErrMsg] = useState(null);
   const [inputGroup, setInputGroup] = useState('');
 
@@ -60,12 +61,17 @@ export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGro
   };
 
   const createGroup = () => {
-    // TODO: make request to create group
-    onAddGroup(inputGroup); // should really be called w/ POST result
-    setInputGroup('');
-    setErrMsg(null);
-    // error case
-    // setErrMsg('Group name already in use!')
+    axios
+      .post('http://localhost:5000/conversation', { groupId: inputGroup })
+      .then(function (response) {
+        socket.emit('joinRoom', inputGroup);
+        onAddGroup(inputGroup); // should really be called w/ POST result
+        setInputGroup('');
+        setErrMsg(null);
+      })
+      .catch(function (error) {
+        setErrMsg('Group name already in use!');
+      });
   };
 
   return (

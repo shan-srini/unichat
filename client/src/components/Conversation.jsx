@@ -26,12 +26,11 @@ const CompositionArea = styled.div`
   width: 90%;
 `;
 
-
 /**
  * View of a single group chat
  */
-export default function Conversation({ group, socket }) {
-  const [messages, setMessages] = useState([]); 
+export default function Conversation({ group, socket, user }) {
+  const [messages, setMessages] = useState([]);
   const [typedMsg, setTypedMsg] = useState('');
 
   useEffect(() => {
@@ -39,16 +38,17 @@ export default function Conversation({ group, socket }) {
       socket.off('message');
       socket.on('message', (msg) => {
         // TODO: check if the msg is for this group.
-        console.log('got message', msg);
-        setMessages((m) => [...m, msg]);
+        if (msg.convo === group) {
+          setMessages((m) => [...m, msg]);
+        }
       });
     }
-      // TODO: request init msgs for this group
+    // TODO: request init msgs for this group
   }, [socket, group]);
 
   const onSendMsg = () => {
     if (typedMsg !== '') {
-      socket.emit('message', typedMsg);
+      socket.emit('message', { conversation_id: group, message: typedMsg, sent_by: user });
       setTypedMsg('');
     }
   };
@@ -58,17 +58,13 @@ export default function Conversation({ group, socket }) {
       {group === undefined ? (
         <p>Join a group to start sending messages</p>
       ) : (
-
         <>
-          <h1 style={{margin: '10px'}}>{group}</h1>
-          <Divider variant="middle" style={{width: '95%'}}/>
+          <h1 style={{ margin: '10px' }}>{group}</h1>
+          <Divider variant="middle" style={{ width: '95%' }} />
 
           <SentMessages>
             {messages.map((msg, idx) => {
-              // TODO: replace the key w/ a unique id, fill in isYours
-              return (
-                <Message msg={msg} isYours={idx % 2} key={msg}/>
-              );
+              return <Message msg={msg} isYours={msg.sender === user} key={msg.id} />;
             })}
           </SentMessages>
 
@@ -80,7 +76,7 @@ export default function Conversation({ group, socket }) {
               value={typedMsg}
               onChange={(e) => setTypedMsg(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onSendMsg()}
-              style={{flexGrow: 1}}
+              style={{ flexGrow: 1 }}
             />
             <Button variant="contained" color="primary" onClick={onSendMsg} style={{ marginLeft: '10px' }}>
               Send

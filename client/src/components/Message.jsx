@@ -20,10 +20,9 @@ export default function Message({ msg, isYours }) {
   return (
     <Container>
       <Nametag component="p" color={isYours ? 'secondary.main' : 'primary.main'}>
-        NAME
+        {msg.sender}
       </Nametag>
-      {/* TODO: extract name from message obj */}
-      <Text component="p">{msg}</Text>
+      <Text component="p">{msg.body}</Text>
     </Container>
   );
 }
