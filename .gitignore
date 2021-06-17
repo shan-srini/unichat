@@ -1,5 +1,12 @@
+# client
 **/node_modules
 **/dist
 **/out
 **/.webpack
 **/.idea
+
+# server
+server/lib
+server/include
+server/bin
+server/pyvenv.cfg
