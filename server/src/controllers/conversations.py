@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from services import chat as chat_service
 
 conversations = Blueprint('conversations', __name__)
@@ -18,7 +18,7 @@ def create_group():
     return jsonify({'success': success}), return_code
 
 @conversations.route('/conversation/<string:id>')
-def get_conversation(id: str):
+def get_conversation(conv_id: str):
     """
     Get a conversation from a given ID
     potential query parameters are:
@@ -26,8 +26,12 @@ def get_conversation(id: str):
         (can keep a default page size of 10 or accept another parameter called "size")
     """
     page = request.args.get('page', 0)
-    # supply these to lrange in chat_service code to do pagination
-    # start = page * 10
-    # end = (page + 1) * 10
-    # TODO
-    return
+    
+    # Set up the start and end spots of the page
+    start = page * 10
+    end = (page + 1) * 10
+
+    message_ids = g.redis.lrange(conv_id, start, end)
+    messages = g.redis.hgetall(message_ids)
+    
+    return messages

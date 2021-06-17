@@ -53,3 +53,4 @@ def persist_message(conversation_id: str, message: str, sent_by: str, timestamp:
         'timestamp': timestamp if timestamp else datetime.utcnow().timestamp()
     }
     g.redis.hset(message_key, mapping=message_val)
+    return message_val
