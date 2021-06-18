@@ -4,6 +4,7 @@
 **/out
 **/.webpack
 **/.idea
+**/package-lock.json
 
 # server
 server/lib

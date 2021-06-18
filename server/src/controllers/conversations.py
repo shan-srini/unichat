@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify, g
 from services import chat as chat_service
+from flask_cors import cross_origin
 
 conversations = Blueprint('conversations', __name__)
 
 @conversations.route('/conversation', methods=['POST'])
+@cross_origin()
 def create_group():
     """
     Attempts to create a conversation
@@ -17,7 +19,8 @@ def create_group():
     return_code = 201 if success else 409
     return jsonify({'success': success}), return_code
 
-@conversations.route('/conversation/<string:id>')
+@conversations.route('/conversation/<conv_id>')
+@cross_origin()
 def get_conversation(conv_id: str):
     """
     Get a conversation from a given ID
@@ -26,13 +29,15 @@ def get_conversation(conv_id: str):
         (can keep a default page size of 10 or accept another parameter called "size")
     """
     page = request.args.get('page', 0)
-    
     # Set up the start and end spots of the page
-    start = page * 10
-    end = (page + 1) * 10
+    # start = page * 10
+    # end = (page + 1) * 10
+    messages = chat_service.get_conversation(conv_id)
+    return jsonify({'messages': messages}), 200
 
-    # TODO: do something abt g.redis
-    message_ids = g.redis.lrange(conv_id, start, end)
-    messages = g.redis.hgetall(message_ids)
-    
-    return messages
+@conversations.route('/conversation/<conv_id>/exists')
+@cross_origin()
+def conversation_exists(conv_id: str):
+    key = chat_service.CONVERSATION.format(conv_id)
+    exists = chat_service.conversation_exists(key)
+    return jsonify({'exists': exists}), 200 if exists else 404

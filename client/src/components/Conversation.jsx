@@ -4,6 +4,7 @@ import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
 import Divider from '@material-ui/core/Divider';
 import Message from './Message';
+const axios = require('axios');
 
 const Container = styled.div`
   width: 60%;
@@ -44,6 +45,10 @@ export default function Conversation({ group, socket, user }) {
       });
     }
     // TODO: request init msgs for this group
+    axios.get(`http://localhost:5000/conversation/${group}`)
+      .then((res) => {
+        setMessages(res.data.messages);
+      })
   }, [socket, group]);
 
   const onSendMsg = () => {

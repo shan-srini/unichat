@@ -53,11 +53,17 @@ export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGro
 
   const joinGroup = () => {
     // TODO: make request to join group
-    onAddGroup(inputGroup); // should really be called w/ POST result
-    setInputGroup('');
-    setErrMsg(null);
-    // error case
-    // setErrMsg('Group name not found!')
+    axios.get(`http://localhost:5000/conversation/${inputGroup}/exists`)
+      .then((res) => {
+        socket.emit('joinRoom', inputGroup);
+        setInputGroup('');
+        onAddGroup(inputGroup); // should really be called w/ POST result
+        setErrMsg(null);
+      })
+      .catch((err) => {
+        // error case
+        setErrMsg('Group name not found!');
+      })
   };
 
   const createGroup = () => {

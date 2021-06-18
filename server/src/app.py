@@ -2,11 +2,13 @@ from flask import Flask, jsonify, g
 from flask_socketio import SocketIO, send, join_room
 import redis
 from services.chat import persist_message
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecret'
+CORS(app, origins=['*'])
 
-socketIo = SocketIO(app, cors_allowed_origins="*")
+socketIo = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
 
 app.debug = True
 app.host = 'localhost'
@@ -19,7 +21,6 @@ app.register_blueprint(conversations)
 @socketIo.on("message")
 def handleMessage(msg):
     ''' Saves Message to Redis and then sends it to the Socket'''
-
     # Saves message to Redis
     msg_values = persist_message(msg['conversation_id'], msg['message'],
                                  msg['sent_by'])
@@ -37,12 +38,12 @@ def handleJoinRoom(room_id):
 #     """ Connect Redis client before request """
 #     g.redis = redis.Redis(host='localhost', port=6379, db=0)
 
-@app.after_request
-def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    header['Access-Control-Allow-Headers'] = '*'
-    return response
+# @app.after_request
+# def after_request(response):
+#     header = response.headers
+#     header['Access-Control-Allow-Origin'] = '*'
+#     header['Access-Control-Allow-Headers'] = '*'
+#     return response
 
 if __name__ == '__main__':
     import eventlet
