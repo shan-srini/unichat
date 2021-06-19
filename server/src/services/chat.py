@@ -1,17 +1,26 @@
 """
 Chat service: Redis related logic
 """
-from flask import g
+import json
 from datetime import datetime
 import uuid
 import redis
+from ibm_watson import LanguageTranslatorV3
 
 # Constants
 CONVERSATION = "CONVERSATION_ID:{}" # -> time_created
 CONVERSATION_MESSAGES = f"{CONVERSATION}#MESSAGES" # -> [message_ids ... ]
-MESSAGE = "MESSAGE_ID:{}" # -> HASH(message_body, timestamp, sender)
+CONVERSATION_LANGUAGES = f"{CONVERSATION}#LANGUAGES" # -> set(languages...)
+MESSAGE = "MESSAGE_ID:{}" # -> HASH(id, body, convo, sender, timestamp, language)
+MESSAGE_LANG = f"{MESSAGE}" + "#{}" # -> HASH(id, body, convo, sender, timestamp, language)
+
 
 redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+translator = LanguageTranslatorV3(version='2018-05-01')
+translation = translator.translate(
+    text='Hello, how are you today?',
+    model_id='en-es').get_result()
+json.dumps(translation, indent=2, ensure_ascii=False)
 
 def conversation_exists(key: str) -> bool:
     """ check if a conversation exists 
@@ -33,7 +42,15 @@ def create_conversation(_id: str) -> bool:
         redis.set(key, time_created)
         return True
 
-def persist_message(conversation_id: str, message: str, sent_by: str, timestamp: float = datetime.utcnow().timestamp()) -> bool:
+def persist_convo_language(conversation_id: str, language: str):
+    key = CONVERSATION_LANGUAGES.format(conversation_id)
+    redis.sadd(key, language)
+
+def get_convo_languages(conversation_id: str) -> set:
+    key = CONVERSATION_LANGUAGES.format(conversation_id)
+    return redis.smembers(key)
+
+def persist_message(conversation_id: str, message: str, sent_by: str, language: str, timestamp: float = datetime.utcnow().timestamp()) -> bool:
     """ Persists a message in Redis
     @param conversation_id str: the id of the conversation
     @param message str: body of message
@@ -50,19 +67,40 @@ def persist_message(conversation_id: str, message: str, sent_by: str, timestamp:
     redis.rpush(message_list_key, message_id)
     # persist message
     message_key = MESSAGE.format(message_id)
+    message_lang_key = MESSAGE_LANG.format(message_id, language)
     message_val = {
         'id': message_id,
         'convo': conversation_id,
         'body': message,
         'sender': sent_by,
-        'timestamp': timestamp
+        'timestamp': timestamp,
+        'language': language,
     }
     redis.hset(message_key, mapping=message_val)
+    redis.hset(message_lang_key, mapping=message_val)
     return message_val
 
-def get_conversation(conversation_id: str):
+def get_conversation(conversation_id: str, language: str):
     """ get a conversation using start and end for the lrange """
     ids_key = CONVERSATION_MESSAGES.format(conversation_id)
     message_ids = redis.lrange(ids_key, 0, -1)
-    messages = [redis.hgetall(MESSAGE.format(m_id)) for m_id in message_ids]
+    messages = [get_msg_in_lang(m_id, language) for m_id in message_ids]
     return messages
+
+def get_msg_in_lang(message_id: str, language: str) -> dict:
+    message_lang_key = MESSAGE_LANG.format(message_id, language)
+    res = redis.hgetall(message_lang_key)
+    if (len(res)):
+        return res
+    original = redis.hgetall(MESSAGE.format(message_id))
+    model = original['language'] + '-' + language
+    translation = translator.translate(
+        text=original['body'],
+        model_id=model).get_result()
+    message_val = {
+        **original,
+        'body': translation['translations'][0]['translation'],
+        'language': language,
+    }
+    redis.hset(message_lang_key, mapping=message_val)
+    return message_val

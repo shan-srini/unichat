@@ -47,7 +47,7 @@ const StyledTextField = styled(TextField)`
 /**
  * All groups a user is in, and controls to join/create groups
  */
-export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGroup, socket }) {
+export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGroup, socket, userLang }) {
   const [errMsg, setErrMsg] = useState(null);
   const [inputGroup, setInputGroup] = useState('');
 
@@ -55,7 +55,7 @@ export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGro
     // TODO: make request to join group
     axios.get(`http://localhost:5000/conversation/${inputGroup}/exists`)
       .then((res) => {
-        socket.emit('joinRoom', inputGroup);
+        socket.emit('joinRoom', {conversation_id: inputGroup, language: userLang});
         setInputGroup('');
         onAddGroup(inputGroup); // should really be called w/ POST result
         setErrMsg(null);
@@ -70,7 +70,7 @@ export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGro
     axios
       .post('http://localhost:5000/conversation', { groupId: inputGroup })
       .then(function (response) {
-        socket.emit('joinRoom', inputGroup);
+        socket.emit('joinRoom', {conversation_id: inputGroup, language: userLang});
         onAddGroup(inputGroup); // should really be called w/ POST result
         setInputGroup('');
         setErrMsg(null);

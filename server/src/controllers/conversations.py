@@ -5,7 +5,7 @@ from flask_cors import cross_origin
 conversations = Blueprint('conversations', __name__)
 
 @conversations.route('/conversation', methods=['POST'])
-@cross_origin()
+# @cross_origin()
 def create_group():
     """
     Attempts to create a conversation
@@ -19,24 +19,20 @@ def create_group():
     return_code = 201 if success else 409
     return jsonify({'success': success}), return_code
 
-@conversations.route('/conversation/<conv_id>')
-@cross_origin()
-def get_conversation(conv_id: str):
+@conversations.route('/conversation/<conv_id>/<language>')
+# @cross_origin()
+def get_conversation(conv_id: str, language: str):
     """
     Get a conversation from a given ID
     potential query parameters are:
         - page
         (can keep a default page size of 10 or accept another parameter called "size")
     """
-    page = request.args.get('page', 0)
-    # Set up the start and end spots of the page
-    # start = page * 10
-    # end = (page + 1) * 10
-    messages = chat_service.get_conversation(conv_id)
+    messages = chat_service.get_conversation(conv_id, language)
     return jsonify({'messages': messages}), 200
 
 @conversations.route('/conversation/<conv_id>/exists')
-@cross_origin()
+# @cross_origin()
 def conversation_exists(conv_id: str):
     key = chat_service.CONVERSATION.format(conv_id)
     exists = chat_service.conversation_exists(key)

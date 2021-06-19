@@ -94,6 +94,7 @@ export default function User({ username, userLang, onSetUser, onSetUserLang }) {
       >
         <option> Enter your Preferred Language: </option>
         <option value={'en'}>Current Browser Language: {navigator.language}</option>
+        {/* TODO: use correct lang value */}
         <option value={'en'}>English</option>
         <option value={'zh'}> Chinese </option>
         <option value={'hi'}> Hindi</option>

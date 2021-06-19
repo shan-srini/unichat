@@ -55,9 +55,10 @@ export default function Messenger() {
           onAddGroup={onAddGroup}
           onSelectGroup={setCurrGroup}
           socket={socket}
+          userLang={lang}
         />
         <Divider orientation="vertical" flexItem />
-        <Conversation group={groups[currGroup]} socket={socket} user={user} />
+        <Conversation group={groups[currGroup]} socket={socket} user={user} userLang={lang} />
         </>
       )}
     </Container>

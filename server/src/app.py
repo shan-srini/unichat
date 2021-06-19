@@ -1,7 +1,6 @@
-from flask import Flask, jsonify, g
+from flask import Flask, request
 from flask_socketio import SocketIO, send, join_room
-import redis
-from services.chat import persist_message
+from services.chat import persist_message, persist_convo_language, get_convo_languages, get_msg_in_lang
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -11,7 +10,7 @@ CORS(app, origins=['*'])
 socketIo = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
 
 app.debug = True
-app.host = 'localhost'
+app.host = '0.0.0.0'
 
 # routes
 from controllers.conversations import conversations
@@ -23,27 +22,23 @@ def handleMessage(msg):
     ''' Saves Message to Redis and then sends it to the Socket'''
     # Saves message to Redis
     msg_values = persist_message(msg['conversation_id'], msg['message'],
-                                 msg['sent_by'])
+                                 msg['sent_by'], msg['language'])
     
-    # Sends messages through socket            
-    send(msg_values, room=msg['conversation_id'])
+    # Sends messages through socket
+    room_langs = get_convo_languages(msg['conversation_id'])
+    for lang in room_langs:
+        translated = get_msg_in_lang(msg_values['id'], lang)
+        send(translated, room=f"{msg['conversation_id']}#{lang}")
+    #TODO: optimize extra translations for disconnected sockets
     return None
 
 @socketIo.on("joinRoom")
-def handleJoinRoom(room_id):
+def handleJoinRoom(payload):
+    room_id = f"{payload['conversation_id']}#{payload['language']}"
     join_room(room_id)
+    persist_convo_language(payload['conversation_id'], payload['language'])
+    # request.sid to identify sockets
 
-# @conversations.before_request
-# def connect_redis():
-#     """ Connect Redis client before request """
-#     g.redis = redis.Redis(host='localhost', port=6379, db=0)
-
-# @app.after_request
-# def after_request(response):
-#     header = response.headers
-#     header['Access-Control-Allow-Origin'] = '*'
-#     header['Access-Control-Allow-Headers'] = '*'
-#     return response
 
 if __name__ == '__main__':
     import eventlet

@@ -11,3 +11,4 @@ server/lib
 server/include
 server/bin
 server/pyvenv.cfg
+**/ibm-credentials.env

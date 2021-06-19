@@ -30,7 +30,7 @@ const CompositionArea = styled.div`
 /**
  * View of a single group chat
  */
-export default function Conversation({ group, socket, user }) {
+export default function Conversation({ group, socket, user, userLang }) {
   const [messages, setMessages] = useState([]);
   const [typedMsg, setTypedMsg] = useState('');
 
@@ -45,7 +45,7 @@ export default function Conversation({ group, socket, user }) {
       });
     }
     // TODO: request init msgs for this group
-    axios.get(`http://localhost:5000/conversation/${group}`)
+    axios.get(`http://localhost:5000/conversation/${group}/${userLang}`)
       .then((res) => {
         setMessages(res.data.messages);
       })
@@ -53,7 +53,7 @@ export default function Conversation({ group, socket, user }) {
 
   const onSendMsg = () => {
     if (typedMsg !== '') {
-      socket.emit('message', { conversation_id: group, message: typedMsg, sent_by: user });
+      socket.emit('message', { conversation_id: group, message: typedMsg, sent_by: user, language: userLang });
       setTypedMsg('');
     }
   };

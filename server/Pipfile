@@ -10,6 +10,9 @@ flask = "*"
 flask_socketio = "*"
 eventlet = "*"
 redis = "*"
+flask_cors = "*"
+ibm-watson = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.7"
