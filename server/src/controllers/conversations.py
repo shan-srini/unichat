@@ -20,7 +20,7 @@ def create_group():
     return jsonify({'success': success}), return_code
 
 @conversations.route('/conversation/<conv_id>/<language>')
-# @cross_origin()
+@cross_origin()
 def get_conversation(conv_id: str, language: str):
     """
     Get a conversation from a given ID

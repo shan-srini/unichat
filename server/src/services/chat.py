@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 import uuid
 import redis
+from ibm_cloud_sdk_core import ApiException
 from ibm_watson import LanguageTranslatorV3
 
 # Constants
@@ -94,13 +95,18 @@ def get_msg_in_lang(message_id: str, language: str) -> dict:
         return res
     original = redis.hgetall(MESSAGE.format(message_id))
     model = original['language'] + '-' + language
-    translation = translator.translate(
-        text=original['body'],
-        model_id=model).get_result()
-    message_val = {
-        **original,
-        'body': translation['translations'][0]['translation'],
-        'language': language,
-    }
-    redis.hset(message_lang_key, mapping=message_val)
-    return message_val
+    try:
+        translation = translator.translate(
+            text=original['body'],
+            model_id=model).get_result()
+        message_val = {
+            **original,
+            'body': translation['translations'][0]['translation'],
+            'language': language,
+        }
+        redis.hset(message_lang_key, mapping=message_val)
+        return message_val
+    except ApiException as e:
+        print('could not translate', model, e)
+        redis.hset(message_lang_key, mapping=original) #cache the untranslated anyways
+        return original

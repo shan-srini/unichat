@@ -1,11 +1,14 @@
-from flask import Flask, request
+import eventlet
+eventlet.monkey_patch()
+
+from flask import Flask
 from flask_socketio import SocketIO, send, join_room
 from services.chat import persist_message, persist_convo_language, get_convo_languages, get_msg_in_lang
 from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecret'
-CORS(app, origins=['*'])
+CORS(app)
 
 socketIo = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
 
@@ -41,6 +44,4 @@ def handleJoinRoom(payload):
 
 
 if __name__ == '__main__':
-    import eventlet
-    eventlet.monkey_patch()
     socketIo.run(app)
