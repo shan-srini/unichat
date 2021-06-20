@@ -13,10 +13,6 @@ const Container = styled.div`
   min-height: 0;
 `;
 
-const GroupHeader = styled.h1`
-  margin: 2.5% 200px;
-  color: #49a2f4;
-`;
 
 export default function Messenger() {
   const [socket, setSocket] = useState(null);

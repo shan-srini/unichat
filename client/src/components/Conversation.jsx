@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
@@ -33,18 +33,21 @@ const CompositionArea = styled.div`
 export default function Conversation({ group, socket, user, userLang }) {
   const [messages, setMessages] = useState([]);
   const [typedMsg, setTypedMsg] = useState('');
+  const messagesEndRef = useRef(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages]);
 
   useEffect(() => {
     if (socket) {
       socket.off('message');
       socket.on('message', (msg) => {
-        // TODO: check if the msg is for this group.
         if (msg.convo === group) {
           setMessages((m) => [...m, msg]);
         }
       });
     }
-    // TODO: request init msgs for this group
     axios.get(`http://localhost:5000/conversation/${group}/${userLang}`)
       .then((res) => {
         setMessages(res.data.messages);
@@ -71,6 +74,7 @@ export default function Conversation({ group, socket, user, userLang }) {
             {messages.map((msg, idx) => {
               return <Message msg={msg} isYours={msg.sender === user} key={msg.id} />;
             })}
+            <div ref={messagesEndRef} />
           </SentMessages>
 
           <CompositionArea>

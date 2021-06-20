@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
@@ -12,6 +12,7 @@ const Container = styled.div`
   min-width: 0;
   min-height: 0;
   width: 100%;
+  align-items: center;
 `;
 const GroupHeader = styled.h1`
   margin: 10px;
@@ -20,9 +21,9 @@ const GroupHeader = styled.h1`
 const ButtonRow = styled.div`
   display: flex;
   width: 50%;
-  padding: 10px 30px;
+  padding: 20px 30px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
 `;
 const StyledButton = styled(Button)`
   width: 48%;

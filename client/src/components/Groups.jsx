@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
@@ -52,7 +52,6 @@ export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGro
   const [inputGroup, setInputGroup] = useState('');
 
   const joinGroup = () => {
-    // TODO: make request to join group
     axios.get(`http://localhost:5000/conversation/${inputGroup}/exists`)
       .then((res) => {
         socket.emit('joinRoom', {conversation_id: inputGroup, language: userLang});
@@ -100,7 +99,7 @@ export default function Groups({ groups, selectedGrpIdx, onAddGroup, onSelectGro
         value={inputGroup}
         onChange={(e) => setInputGroup(e.target.value)}
         style={{}}
-        error={errMsg}
+        error={!!errMsg}
         helperText={errMsg || 'Enter unique group name'}
       />
       <ButtonRow>
